@@ -19,7 +19,7 @@ numLatentClass = 5;
 
 if matlabpool('size') == 0 
 	
-	matlabpool 
+	%matlabpool 
 
 end
 
@@ -98,6 +98,10 @@ stdUser = sqrt(VarUser);
 
 %initialize Variables
 
+numUser = 100;
+nuMovie = 200;
+
+
 Q = rand(numUser, numMovie, numLatentClass);
 
 A = rand(numUser, numLatentClass);
@@ -114,10 +118,16 @@ M_yz = rand(numMovie, numLatentClass);
 
 Std_yz = rand(numMovie, numLatentClass);
 
+h=waitbar(0,'Please wait..');
 
+
+    
 for i=1:numIteration 
 	
 	%calculateE;
+	
+	    waitbar(i/numIteration);
+
 	
 	for countUser=1:numUser
 		
@@ -133,6 +143,7 @@ for i=1:numIteration
 			
 			end
 			
+			
 			for countLC=1:numLatentClass
 				
 				up = Pzu(countUser,countLC) * gaussianPDF(ratings(countUser, countItem),M_yz(countItem, countLC),Std_yz(countItem,countLC));
@@ -140,6 +151,13 @@ for i=1:numIteration
 				 
 				
 				Q(countUser,countItem,countLC) = up/down;
+				
+				if isnan(up/down) 
+					
+					disp 'Q NaN occured'
+					
+				end
+				
 				
 			end
 			
@@ -154,22 +172,89 @@ for i=1:numIteration
 	
 	%First Calculate M_yz
 	
-	for countUser=1:numUser
+	for countItem=1:numMovie
 		
-		for countItem=1:numMovie
-			
-			down = 0;
-			
-			for countLC=1:numLatentClass
-	
-	
+		for countLC=1:numLatentClass
+
+			up = 0; 
+			down =0;
+
+			for countUser = 1 : numUser
+
+				up = up + ratings(countUser,countItem)*Q(countUser,countItem,countLC);
+				down = down + Q(countUser,countItem,countLC);
+
 			end
+
+			M_yz(countItem,countLC) = up/down;
+
+
+		end
+		
+	end
+	
+	%Second Calculate Std_yz
+	
+	for countItem=1:numMovie
+		
+		for countLC=1:numLatentClass
+
+			up = 0; 
+			down =0;
+
+			for countUser = 1 : numUser
+
+				up = up + (ratings(countUser,countItem)-M_yz(countItem,countLC))^2*Q(countUser,countItem,countLC);
+				down = down + Q(countUser,countItem,countLC);
+
+			end
+
+			M_yz(countItem,countLC) = up/down;
+
 			
 		end
 		
 	end
 	
+	if isnan(Pzu(1,1))
+		
+		disp 'NaN occured!'
+		
+	end
+	
 	 
+	 %Lastly Calculate Pzu
+
+	for countUser=1:numUser
+
+		down=0;
+		
+		for countLC=1:numLatentClass
+
+		
+			up = 0; 
+			
+
+			for countItem = 1 : numMovie
+
+				up = up + Q(countUser,countItem,countLC);
+				down = down + Q(countUser,countItem,countLC);
+
+			end
+
+			Pzu(countUser,countLC) = up;
+
+			
+		end
+		
+		
+		
+		
+		Pzu(countUser,:) = Pzu(countUser,:) / down;
+
+	end
+
+	
 	disp(i);
 	
 	%calculateM;
@@ -177,6 +262,8 @@ for i=1:numIteration
 	
 end
 
+
+close(h)
 
 toc
 

@@ -19,7 +19,7 @@ numLatentClass = 5;
 
 if matlabpool('size') == 0 
 	
-	matlabpool 
+	%matlabpool 
 
 end
 
@@ -98,6 +98,10 @@ stdUser = sqrt(VarUser);
 
 %initialize Variables
 
+numUser = 100;
+nuMovie = 200;
+
+
 Q = rand(numUser, numMovie, numLatentClass);
 
 A = rand(numUser, numLatentClass);
@@ -114,10 +118,16 @@ M_yz = rand(numMovie, numLatentClass);
 
 Std_yz = rand(numMovie, numLatentClass);
 
+h=waitbar(0,'Please wait..');
 
+
+    
 for i=1:numIteration 
 	
 	%calculateE;
+	
+	    waitbar(i/numIteration);
+
 	
 	for countUser=1:numUser
 		
@@ -129,9 +139,12 @@ for i=1:numIteration
 				
 				up = Pzu(countUser,countLC) * gaussianPDF(ratings(countUser, countItem),M_yz(countItem, countLC),Std_yz(countItem,countLC));
 				
+				
+				
 				down = down + up;
 			
 			end
+			
 			
 			for countLC=1:numLatentClass
 				
@@ -140,6 +153,9 @@ for i=1:numIteration
 				 
 				
 				Q(countUser,countItem,countLC) = up/down;
+				
+				
+				
 				
 			end
 			
@@ -163,10 +179,22 @@ for i=1:numIteration
 
 			for countUser = 1 : numUser
 
-				up = up + ratings(countUser,countItem)*Q(countUser,countItem,countLC);
-				down = down + Q(countUser,countItem,countLC);
+				if ratings(countUser,countItem) ~= 0
+				
+					up = up + ratings(countUser,countItem)*Q(countUser,countItem,countLC);
+				
+					down = down + Q(countUser,countItem,countLC);
+					
+				end
+				
 
 			end
+			
+			if isnan(up/down) 
+					
+					disp 'M NaN occured'
+					
+				end
 
 			M_yz(countItem,countLC) = up/down;
 
@@ -186,9 +214,12 @@ for i=1:numIteration
 
 			for countUser = 1 : numUser
 
+				if ratings(countUser,countItem) ~= 0
+				
 				up = up + (ratings(countUser,countItem)-M_yz(countItem,countLC))^2*Q(countUser,countItem,countLC);
 				down = down + Q(countUser,countItem,countLC);
 
+				end
 			end
 
 			M_yz(countItem,countLC) = up/down;
@@ -206,6 +237,7 @@ for i=1:numIteration
 		
 		for countLC=1:numLatentClass
 
+		
 			up = 0; 
 			
 
@@ -221,6 +253,9 @@ for i=1:numIteration
 			
 		end
 		
+		
+		
+		
 		Pzu(countUser,:) = Pzu(countUser,:) / down;
 
 	end
@@ -233,6 +268,8 @@ for i=1:numIteration
 	
 end
 
+
+close(h)
 
 toc
 
