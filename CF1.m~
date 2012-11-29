@@ -11,7 +11,7 @@ q = 5;
 
 numIteration = 10;
 
-numLatentClass = 50; 
+numLatentClass = 2; 
 
 
 
@@ -23,7 +23,7 @@ if matlabpool('size') == 0
 
 end
 
-load 1Kratings
+load smallRatings
 
 colormap('bone');
 
@@ -104,6 +104,10 @@ stdUser = sqrt(VarUser);
 
 Q = rand(numUser, numMovie, numLatentClass);
 
+D = sum(sum(sum(Q)));
+
+Q = Q/D;
+
 A = rand(numUser, numLatentClass);
 
 B = sum(A,2);
@@ -116,7 +120,7 @@ Pzu = A ./ D;
 
 M_yz = rand(numMovie, numLatentClass);
 
-Std_yz = rand(numMovie, numLatentClass);
+Std_yz = 3*ones(numMovie, numLatentClass);
 
 h=waitbar(0,'Please wait..');
 
@@ -127,6 +131,8 @@ for i=1:numIteration
 	%calculateE;
 	
 	    waitbar(i/numIteration);
+		
+	PreviousQ = Q;
 
 	
 	for countUser=1:numUser
@@ -181,6 +187,8 @@ for i=1:numIteration
 	
 	%First Calculate M_yz
 	
+	PreviousM = M_yz; 
+	
 	for countItem=1:numMovie
 		
 		for countLC=1:numLatentClass
@@ -220,6 +228,8 @@ for i=1:numIteration
 	disp([num2str(i), ' : Updated Mean(yz)']);
 	%Second Calculate Std_yz
 	
+	PreviousStd = Std_yz;
+	
 	for countItem=1:numMovie
 		
 		for countLC=1:numLatentClass
@@ -257,6 +267,7 @@ for i=1:numIteration
 	disp([num2str(i), ' : Updated STD(yz)']);
 	 %Lastly Calculate Pzu
 
+	 PreviousPzu = Pzu;
 	for countUser=1:numUser
 
 		down=0;
@@ -337,7 +348,7 @@ for i=1:numIteration
 			
 			if ratings(countUser, countItem) ~= 0 
 				
-				squareLoss = squareLoss +  sqrt(ratings(countUser,countItem)-ExpectedRating(countUser,countItem));
+				squareLoss = squareLoss +  sqrt((ratings(countUser,countItem)-ExpectedRating(countUser,countItem))^2);
 				
 			end
 			
