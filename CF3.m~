@@ -99,13 +99,15 @@ for countIter=1:numIteration
 							
 			down = 0;
 
-			if origRatings(countUser,countItem) ~= 0 
+			if(origRatings(countUser,countItem) ~=0 
 				
 				up = Pzu(countUser,:) .* gaussianPDF(ratings(countUser,countItem)*ones(1,numLatentClass),M_yz(countItem,:),Std_yz(countItem,:));
 			
 				up = up.^beta;
-				
-				down = sum(up);
+			
+			end
+			
+			down = sum(up);
 			
 			if ismember(1,isnan(up/down))
 				
@@ -116,11 +118,6 @@ for countIter=1:numIteration
 			
 				
 			Q(countUser,countItem,:) = up/down;
-			
-			
-			
-			end
-			
 			
 				
 		end
