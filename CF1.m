@@ -11,7 +11,7 @@ q = 5;
 
 numIteration = 10;
 
-numLatentClass = 5; 
+numLatentClass = 50; 
 
 
 
@@ -98,8 +98,8 @@ stdUser = sqrt(VarUser);
 
 %initialize Variables
 
-numUser = 100;
-nuMovie = 200;
+%numUser = 500;
+%nuMovie = 1000;
 
 
 Q = rand(numUser, numMovie, numLatentClass);
@@ -133,39 +133,50 @@ for i=1:numIteration
 		
 		for countItem=1:numMovie
 			
-			down = 0;
-			
-			for countLC=1:numLatentClass
+			if ratings(countUser, countItem) ~= 0 
 				
-				up = Pzu(countUser,countLC) * gaussianPDF(ratings(countUser, countItem),M_yz(countItem, countLC),Std_yz(countItem,countLC));
+				down = 0;
+
+
+				for countLC=1:numLatentClass
+
+					up = Pzu(countUser,countLC) * gaussianPDF(ratings(countUser, countItem),M_yz(countItem, countLC),Std_yz(countItem,countLC));
+
+					down = down + up;
+
+
+				end
+
+
+				for countLC=1:numLatentClass
+
+					up = Pzu(countUser,countLC) * gaussianPDF(ratings(countUser, countItem),M_yz(countItem, countLC),Std_yz(countItem,countLC));
+
+
+					
+					 if isnan(up/down)
+					 
+						%disp 'Q NaN occured!' 
+					
+					%pause
+					
+					 else
+					 
+						 Q(countUser,countItem,countLC) = up/down;
 				
-				
-				
-				down = down + up;
-			
-			end
-			
-			
-			for countLC=1:numLatentClass
-				
-				up = Pzu(countUser,countLC) * gaussianPDF(ratings(countUser, countItem),M_yz(countItem, countLC),Std_yz(countItem,countLC));
-				
-				 
-				
-				Q(countUser,countItem,countLC) = up/down;
-				
-				
-				
-				
+					 end
+									 
+				end
 			end
 			
 		end
-		
-		disp(countUser);
+		%disp(countUser);
 		
 	end
 	
 	
+	disp([num2str(i), ' : Finished E step']);
+		
 	%calculate M
 	
 	%First Calculate M_yz
@@ -190,19 +201,23 @@ for i=1:numIteration
 
 			end
 			
-			if isnan(up/down) 
-					
-					disp 'M NaN occured'
-					
-				end
+			if isnan(up/down)
+				
+				%disp 'M NaN occured!'
+				
+				%pause;
+				
+			else 
 
-			M_yz(countItem,countLC) = up/down;
+				M_yz(countItem,countLC) = up/down;
 
+			end
 
 		end
 		
 	end
 	
+	disp([num2str(i), ' : Updated Mean(yz)']);
 	%Second Calculate Std_yz
 	
 	for countItem=1:numMovie
@@ -216,19 +231,30 @@ for i=1:numIteration
 
 				if ratings(countUser,countItem) ~= 0
 				
-				up = up + (ratings(countUser,countItem)-M_yz(countItem,countLC))^2*Q(countUser,countItem,countLC);
-				down = down + Q(countUser,countItem,countLC);
+					up = up + (ratings(countUser,countItem)-M_yz(countItem,countLC))^2*Q(countUser,countItem,countLC);
+					down = down + Q(countUser,countItem,countLC);
 
 				end
 			end
-
-			M_yz(countItem,countLC) = up/down;
-
 			
+			if isnan(up/down)
+				
+				%disp 'STD NaN occured'
+				
+				%pause
+				
+			else 
+
+				Std_yz(countItem,countLC) = sqrt(up/down);
+
+			end
+						
 		end
 		
 	end
 	 
+	
+	disp([num2str(i), ' : Updated STD(yz)']);
 	 %Lastly Calculate Pzu
 
 	for countUser=1:numUser
@@ -254,18 +280,81 @@ for i=1:numIteration
 		end
 		
 		
-		
-		
-		Pzu(countUser,:) = Pzu(countUser,:) / down;
+		if down == 0
+			
+			disp 'Pzu NaN occured'
+			
+			pause
+			
+		else 	
+	
+			Pzu(countUser,:) = Pzu(countUser,:) / down;
 
+		end
+		
 	end
 
 	
-	disp(i);
+	disp([num2str(i), ' : Updated P(yz)']);
+	
+	%disp(i);
 	
 	%calculateM;
 	%displayRisk;
+
+	numRating = 0;
 	
+	ExpectedRating = zeros(numUser,numMovie);
+	
+	for countUser=1:numUser
+		
+		for countItem=1:numMovie
+			
+			if ratings(countUser, countItem) ~= 0 
+				
+				numRating = numRating + 1;
+				acc = 0;
+				
+				for countLC = 1:numLatentClass
+					
+					acc = acc + Pzu(countUser,countLC)*M_yz(countItem, countLC);
+					
+				end
+				
+				ExpectedRating(countUser,countItem) = acc;
+				
+			end
+			
+		end
+		
+	end
+	
+	squareLoss = 0;
+	
+	for countUser=1:numUser
+		
+		for countItem=1:numMovie
+			
+			if ratings(countUser, countItem) ~= 0 
+				
+				squareLoss = squareLoss +  sqrt(ratings(countUser,countItem)-ExpectedRating(countUser,countItem));
+				
+			end
+			
+		end
+		
+	end
+	
+	squareLoss = squareLoss/numRating
+	
+	Risk(i)=squareLoss;
+	
+	plot(Risk);
+	
+	
+	disp([num2str(i), ' : Updated Risk)']);
+		
+		
 end
 
 
