@@ -11,7 +11,7 @@ q = 5;
 
 numIteration = 20;
 
-numLatentClass = 50; 
+numLatentClass = 3; 
 
 
 
@@ -23,7 +23,7 @@ if matlabpool('size') == 0
 
 end
 
-load 1Kratings
+load smallRatings
 
 colormap('bone');
 
@@ -95,6 +95,12 @@ stdAll = std2(ratings);
 VarUser = (var(ratings,0,2) + q*stdAll) ./ (numRatingUser + q);
 stdUser = sqrt(VarUser);
 
+for i = 1:numUser
+	
+	ratings(i,:) = (ratings(i,:)-meanUser(i)) / stdUser(i);
+	
+end
+
 
 %initialize Variables
 
@@ -118,7 +124,7 @@ D = B * C;
 
 Pzu = A ./ D;
 
-M_yz = rand(numMovie, numLatentClass);
+M_yz = randn(numMovie, numLatentClass);
 
 Std_yz = 3*ones(numMovie, numLatentClass);
 
@@ -138,47 +144,39 @@ for i=1:numIteration
 	for countUser=1:numUser
 		
 		for countItem=1:numMovie
+							
+			down = 0;
+
+			up = Pzu(countUser,:) .* gaussianPDF(ratings(countUser,countItem)*ones(1,numLatentClass),M_yz(countItem,:),Std_yz(countItem,:));
 			
-			if ratings(countUser, countItem) ~= 0 
+			down = sum(up);
+			
+			if down ~= 0 
 				
-				down = 0;
-
-
-				for countLC=1:numLatentClass
-
-					up = Pzu(countUser,countLC) * gaussianPDF(ratings(countUser, countItem),M_yz(countItem, countLC),Std_yz(countItem,countLC));
-
-					down = down + up;
-
-
-				end
-
-
-				for countLC=1:numLatentClass
-
-					up = Pzu(countUser,countLC) * gaussianPDF(ratings(countUser, countItem),M_yz(countItem, countLC),Std_yz(countItem,countLC));
-
-
-					
-					 if isnan(up/down)
-					 
-						%disp 'Q NaN occured!' 
-					
-					%pause
-					
-					 else
-					 
-						 Q(countUser,countItem,countLC) = up/down;
-				
-					 end
-									 
-				end
+				Q(countUser,countItem,:) = up/down;
 			end
 			
+			
+				
 		end
 		%disp(countUser);
 		
 	end
+	
+	temp = sum(sum(sum(Q)));
+	
+	Q = Q/temp;
+	
+	A = isnan(Q);
+	
+	if ismember(1,A) 
+		
+		disp 'Q NaN occured'
+		
+		pause;
+		
+	end
+	
 	
 	
 	disp([num2str(i), ' : Finished E step']);
@@ -211,9 +209,9 @@ for i=1:numIteration
 			
 			if isnan(up/down)
 				
-				%disp 'M NaN occured!'
+				disp 'M NaN occured!'
 				
-				%pause;
+				pause;
 				
 			else 
 
@@ -249,9 +247,9 @@ for i=1:numIteration
 			
 			if isnan(up/down)
 				
-				%disp 'STD NaN occured'
+				disp 'STD NaN occured'
 				
-				%pause
+				pause
 				
 			else 
 
