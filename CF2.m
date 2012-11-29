@@ -7,82 +7,18 @@ clear
 % Custom input Parameters
 %============================
 
-q = 5;
+q = 1;
 
 numIteration = 200;
 
-numLatentClass = 3; 
+numLatentClass = 40; 
 
-beta = 0.5
+beta = 1
 
 
-
-%============================
-
-if matlabpool('size') == 0 
-	
-	%matlabpool 
-
-end
-
-load smallRatings
-
-colormap('bone');
+load 1Kratings
 
 [numUser numMovie] = size(ratings);
-
-movieRatings = zeros(numMovie ,2);
-userRatings = zeros (numUser,2);
-
-count = 0;
-
-TempRating = 0;
-
-for i =1:numMovie 
-	
-	for j = 1:numUser 
-
-		if ratings(j,i) > 0 
-			
-			count = count+1;
-			
-			TempRating = TempRating + ratings(j,i);
-		end
-		
-	end
-	
-	
-	movieRatings(i,1) = count;
-	
-	movieRatings(i,2) = TempRating/count;
-	
-	count =0;
-	TempRating =0;
-end
-
-for i =1:numUser 
-	
-	for j = 1:numMovie 
-
-		if ratings(i,j) > 0 
-			
-			count = count+1;
-			
-			TempRating = TempRating + ratings(i,j);
-		end
-		
-	end
-	
-	
-	userRatings(i,1) = count;
-	
-	userRatings(i,2) = TempRating/count;
-	
-	count =0;
-	TempRating =0;
-	
-	
-end
 
 meanUser = mean(ratings,2);
 
@@ -92,10 +28,14 @@ n=histc(ratings,edges,2);
 
 numRatingUser = n(:,2)+n(:,3)+n(:,4) + n(:,5) + n(:,6);
 
+meanUser = sum(ratings,2) ./ numRatingUser;
+
 stdAll = std2(ratings);
 
 VarUser = (var(ratings,0,2) + q*stdAll) ./ (numRatingUser + q);
 stdUser = sqrt(VarUser);
+
+origRatings = ratings;
 
 for i = 1:numUser
 	
@@ -128,7 +68,7 @@ Pzu = A ./ D;
 
 M_yz = randn(numMovie, numLatentClass);
 
-Std_yz = 3*ones(numMovie, numLatentClass);
+Std_yz = 3*rand(numMovie, numLatentClass)+1;
 
 h=waitbar(0,'Please wait..');
 
@@ -155,46 +95,27 @@ for i=1:numIteration
 			
 			down = sum(up);
 			
-			
-	if ismember(1,isnan(up)) 
-		
-		disp 'UP NaN occured'
-		
-		pause;
-		
-	end
-	
-			if down ~= 0 
 				
-				Q(countUser,countItem,:) = up/down;
-			else
-			
-				disp 'Q down is 0'
-				pause;
-			end
-			
+			Q(countUser,countItem,:) = up/down;
 			
 				
 		end
-		%disp(countUser);
+		
 		
 	end
 	
-	temp = sum(sum(sum(Q)));
-	
-	Q = Q/temp;
-	
-	A = isnan(Q);
-	
-	if ismember(1,A) 
+	 
+D = sum(sum(sum(Q)));
+
+Q = Q/D;
+
+	if ismember(1,isnan(Q)) 
 		
 		disp 'Q NaN occured'
 		
-		pause;
+		%pause;
 		
 	end
-	
-	
 	
 	disp([num2str(i), ' : Finished E step']);
 		
@@ -209,32 +130,20 @@ for i=1:numIteration
 		for countLC=1:numLatentClass
 
 			up = 0; 
-			down =0;
 
 			for countUser = 1 : numUser
 
-				if ratings(countUser,countItem) ~= 0
+				if origRatings(countUser,countItem) ~= 0
 				
 					up = up + ratings(countUser,countItem)*Q(countUser,countItem,countLC);
 				
-					down = down + Q(countUser,countItem,countLC);
-					
 				end
-				
 
 			end
 			
-			if isnan(up/down)
-				
-				disp 'M NaN occured!'
-				
-				pause;
-				
-			else 
+			down = sum(Q(:,countItem,countLC));
 
-				M_yz(countItem,countLC) = up/down;
-
-			end
+			M_yz(countItem,countLC) = up/down;
 
 		end
 		
@@ -245,11 +154,12 @@ for i=1:numIteration
 		
 		disp 'M NaN occured'
 		
-		%pause;
+		pause;
 		
 	end
 	
 	disp([num2str(i), ' : Updated Mean(yz)']);
+	
 	%Second Calculate Std_yz
 	
 	PreviousStd = Std_yz;
@@ -258,30 +168,30 @@ for i=1:numIteration
 		
 		for countLC=1:numLatentClass
 
-			up = 0; 
-			down =0;
+			tempup = 0; 
 
 			for countUser = 1 : numUser
 
-				if ratings(countUser,countItem) ~= 0
+				if origRatings(countUser,countItem) ~= 0
 				
-					up = up + (ratings(countUser,countItem)-M_yz(countItem,countLC))^2*Q(countUser,countItem,countLC);
-					down = down + Q(countUser,countItem,countLC);
-
+					tempup = tempup + (ratings(countUser,countItem)-M_yz(countItem,countLC))^2*Q(countUser,countItem,countLC);
+					
 				end
 			end
 			
-			if isnan(up/down)
+			down = sum(Q(:,countItem,countLC));
+			
+			if(tempup/down > 0.1) 
 				
-				disp 'STD NaN occured'
+				Std_yz(countItem,countLC) = sqrt(tempup/down);
+			
+			else
 				
-				pause
+				Std_yz(countItem,countLC) = 0.1;
 				
-			else 
-
-				Std_yz(countItem,countLC) = sqrt(up/down);
-
 			end
+			
+				
 						
 		end
 		
@@ -299,6 +209,7 @@ for i=1:numIteration
 	 %Lastly Calculate Pzu
 
 	 PreviousPzu = Pzu;
+	 
 	for countUser=1:numUser
 
 		down=0;
@@ -322,25 +233,16 @@ for i=1:numIteration
 		end
 		
 		
-		if down == 0
-			
-			disp 'Pzu NaN occured'
-			
-			pause
-			
-		else 	
 	
-			Pzu(countUser,:) = Pzu(countUser,:) / down;
-
-		end
-		
+		Pzu(countUser,:) = Pzu(countUser,:) / down;
+	
 	end
 	
 	if ismember(1,isnan(Pzu)) 
 		
 		disp 'Pzu NaN occured'
 		
-		%pause;
+		pause;
 		
 	end
 
@@ -360,9 +262,6 @@ for i=1:numIteration
 		
 		for countItem=1:numMovie
 			
-			if ratings(countUser, countItem) ~= 0 
-				
-				numRating = numRating + 1;
 				acc = 0;
 				
 				for countLC = 1:numLatentClass
@@ -373,7 +272,6 @@ for i=1:numIteration
 				
 				ExpectedRating(countUser,countItem) = acc;
 				
-			end
 			
 		end
 		
@@ -385,7 +283,11 @@ for i=1:numIteration
 		
 		for countItem=1:numMovie
 			
-			if ratings(countUser, countItem) ~= 0 
+			if origRatings(countUser, countItem) ~= 0 
+				
+					
+				numRating = numRating + 1;
+			
 				
 				squareLoss = squareLoss +  sqrt((ratings(countUser,countItem)-ExpectedRating(countUser,countItem))^2);
 				

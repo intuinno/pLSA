@@ -9,9 +9,11 @@ clear
 
 q = 5;
 
-numIteration = 20;
+numIteration = 200;
 
-numLatentClass = 3; 
+numLatentClass = 5; 
+
+beta = 0.5
 
 
 
@@ -126,7 +128,7 @@ Pzu = A ./ D;
 
 M_yz = randn(numMovie, numLatentClass);
 
-Std_yz = 3*ones(numMovie, numLatentClass);
+Std_yz = 3*rand(numMovie, numLatentClass)+1;
 
 h=waitbar(0,'Please wait..');
 
@@ -149,11 +151,26 @@ for i=1:numIteration
 
 			up = Pzu(countUser,:) .* gaussianPDF(ratings(countUser,countItem)*ones(1,numLatentClass),M_yz(countItem,:),Std_yz(countItem,:));
 			
+			up = up.^beta;
+			
 			down = sum(up);
 			
+			
+	if ismember(1,isnan(up)) 
+		
+		disp 'UP NaN occured'
+		
+		pause;
+		
+	end
+	
 			if down ~= 0 
 				
 				Q(countUser,countItem,:) = up/down;
+			else
+			
+				disp 'Q down is 0'
+				pause;
 			end
 			
 			
@@ -223,6 +240,15 @@ for i=1:numIteration
 		
 	end
 	
+	
+	if ismember(1,isnan(M_yz)) 
+		
+		disp 'M NaN occured'
+		
+		%pause;
+		
+	end
+	
 	disp([num2str(i), ' : Updated Mean(yz)']);
 	%Second Calculate Std_yz
 	
@@ -261,6 +287,13 @@ for i=1:numIteration
 		
 	end
 	 
+	if ismember(1,isnan(Std_yz)) 
+		
+		disp 'Std NaN occured'
+		
+		pause;
+		
+	end
 	
 	disp([num2str(i), ' : Updated STD(yz)']);
 	 %Lastly Calculate Pzu
@@ -300,6 +333,14 @@ for i=1:numIteration
 			Pzu(countUser,:) = Pzu(countUser,:) / down;
 
 		end
+		
+	end
+	
+	if ismember(1,isnan(Pzu)) 
+		
+		disp 'Pzu NaN occured'
+		
+		%pause;
 		
 	end
 
