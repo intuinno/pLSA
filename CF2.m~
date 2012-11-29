@@ -11,7 +11,7 @@ q = 1;
 
 numIteration = 200;
 
-numLatentClass = 40; 
+numLatentClass = 4; 
 
 beta = 1
 
@@ -43,7 +43,7 @@ VarUser = sum(tempRatings,2) ./numRatingUser - meanUser.^2;
 
 
 
-stdUser = sqrt(VarUser);
+stdUser = sqrt(VarUser)+1;
 
 origRatings = ratings;
 
@@ -108,6 +108,7 @@ for i=1:numIteration
 			if ismember(1,isnan(up/down))
 				
 				disp 'Q2 Nan occured'
+				pause;
 				
 			end
 			

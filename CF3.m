@@ -47,11 +47,11 @@ stdUser = sqrt(VarUser);
 
 origRatings = ratings;
 
-for i = 1:numUser
-	
-	ratings(i,:) = (ratings(i,:)-meanUser(i)) / stdUser(i);
-	
-end
+% for i = 1:numUser
+% 	
+% 	ratings(i,:) = (ratings(i,:)-meanUser(i)) / stdUser(i);
+% 	
+% end
 
 
 %initialize Variables
@@ -76,7 +76,7 @@ D = B * C;
 
 Pzu = A ./ D;
 
-M_yz = randn(numMovie, numLatentClass);
+M_yz = randn(numMovie, numLatentClass)*5;
 
 Std_yz = 3*rand(numMovie, numLatentClass)+1;
 
