@@ -29,10 +29,20 @@ n=histc(ratings,edges,2);
 numRatingUser = n(:,2)+n(:,3)+n(:,4) + n(:,5) + n(:,6);
 
 meanUser = sum(ratings,2) ./ numRatingUser;
+% 
+% stdAll = std2(ratings);
+% 
+% VarUser = (var(ratings,0,2) + q*stdAll) ./ (numRatingUser + q);
+% stdUser = sqrt(VarUser);
 
-stdAll = std2(ratings);
+VarUser = 0;
 
-VarUser = (var(ratings,0,2) + q*stdAll) ./ (numRatingUser + q);
+tempRatings = ratings.^2;
+
+VarUser = sum(tempRatings,2) ./numRatingUser - meanUser.^2;
+
+
+
 stdUser = sqrt(VarUser);
 
 origRatings = ratings;
@@ -94,6 +104,12 @@ for i=1:numIteration
 			up = up.^beta;
 			
 			down = sum(up);
+			
+			if ismember(1,isnan(up/down))
+				
+				disp 'Q2 Nan occured'
+				
+			end
 			
 				
 			Q(countUser,countItem,:) = up/down;

@@ -11,12 +11,12 @@ q = 1;
 
 numIteration = 200;
 
-numLatentClass = 4; 
+numLatentClass = 40; 
 
 beta = 1
 
 
-load smallRatings
+load 1Kratings
 
 [numUser numMovie] = size(ratings);
 
@@ -29,10 +29,20 @@ n=histc(ratings,edges,2);
 numRatingUser = n(:,2)+n(:,3)+n(:,4) + n(:,5) + n(:,6);
 
 meanUser = sum(ratings,2) ./ numRatingUser;
+% 
+% stdAll = std2(ratings);
+% 
+% VarUser = (var(ratings,0,2) + q*stdAll) ./ (numRatingUser + q);
+% stdUser = sqrt(VarUser);
 
-stdAll = std2(ratings);
+VarUser = 0;
 
-VarUser = (var(ratings,0,2) + q*stdAll) ./ (numRatingUser + q);
+tempRatings = ratings.^2;
+
+VarUser = sum(tempRatings,2) ./numRatingUser - meanUser.^2;
+
+
+
 stdUser = sqrt(VarUser);
 
 origRatings = ratings;
@@ -95,6 +105,12 @@ for i=1:numIteration
 			
 			down = sum(up);
 			
+			if ismember(1,isnan(up/down))
+				
+				disp 'Q2 Nan occured'
+				
+			end
+			
 				
 			Q(countUser,countItem,:) = up/down;
 			
@@ -104,6 +120,11 @@ for i=1:numIteration
 		
 	end
 	
+	 
+D = sum(sum(sum(Q)));
+
+Q = Q/D;
+
 	if ismember(1,isnan(Q)) 
 		
 		disp 'Q NaN occured'
@@ -163,21 +184,30 @@ for i=1:numIteration
 		
 		for countLC=1:numLatentClass
 
-			up = 0; 
+			tempup = 0; 
 
 			for countUser = 1 : numUser
 
 				if origRatings(countUser,countItem) ~= 0
 				
-					up = up + (ratings(countUser,countItem)-M_yz(countItem,countLC))^2*Q(countUser,countItem,countLC);
+					tempup = tempup + (ratings(countUser,countItem)-M_yz(countItem,countLC))^2*Q(countUser,countItem,countLC);
 					
 				end
 			end
 			
 			down = sum(Q(:,countItem,countLC));
-
-			Std_yz(countItem,countLC) = sqrt(up/down);
-
+			
+			if(tempup/down > 0.1) 
+				
+				Std_yz(countItem,countLC) = sqrt(tempup/down);
+			
+			else
+				
+				Std_yz(countItem,countLC) = 0.1;
+				
+			end
+			
+				
 						
 		end
 		
