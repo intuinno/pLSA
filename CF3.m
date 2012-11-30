@@ -331,6 +331,21 @@ for countIter=1:numIteration
 	
 	plot(Risk);
 	
+	if countIter > 5 
+		
+	if  Risk(countIter-1) - Risk(countIter) < Risk(countIter-1)*0.000001 
+		
+		disp 'Converged'
+		
+		break;
+		
+		
+	end
+	
+	end
+	
+	
+	
 	
 	disp([num2str(i), ' : Updated Risk)']);
 		
