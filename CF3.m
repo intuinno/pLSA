@@ -80,7 +80,7 @@ M_yz = rand(numMovie, numLatentClass)*5;
 
 Std_yz = 3*rand(numMovie, numLatentClass)+1;
 
-h=waitbar(0,'Please wait..');
+%h=waitbar(0,'Please wait..');
 
 
     
@@ -88,7 +88,7 @@ for countIter=1:numIteration
 	
 	%calculateE;
 	
-	    waitbar(i/numIteration);
+%	    waitbar(i/numIteration);
 		
 	PreviousQ = Q;
 
@@ -337,8 +337,9 @@ for countIter=1:numIteration
 		
 end
 
+fileName = ['Report ',datestr(now)];
 
-close(h)
+save(fileName);
 
 toc
 
