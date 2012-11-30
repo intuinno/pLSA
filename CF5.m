@@ -205,7 +205,9 @@ for countFile = 1:5
 					
 				end
 				
-				M_yz(countItem,countLC) = up/down;
+				if (down ~=0)
+					M_yz(countItem,countLC) = up/down;
+				end
 				
 				
 			end
