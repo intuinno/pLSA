@@ -11,7 +11,7 @@ q = 1;
 
 numIteration = 100;
 
-numLatentClass = 3; 
+numLatentClass = 2; 
 
 beta = 1
 
@@ -31,6 +31,7 @@ numRatingUser = n(:,2)+n(:,3)+n(:,4) + n(:,5) + n(:,6);
 meanUser = sum(ratings,2) ./ numRatingUser;
 % 
 % stdAll = std2(ratings);
+% 
 % VarUser = (var(ratings,0,2) + q*stdAll) ./ (numRatingUser + q);
 % stdUser = sqrt(VarUser);
 
@@ -39,24 +40,14 @@ VarUser = 0;
 for i =1:numUser
 	
 	acc = 0;
-	count = 0;
+	
 	for j=1:numMovie
 		
-		if ratings(i,j) ~= 0 
-			
-			acc = acc + (ratings(i,j)-meanUser(i))^2
-			count = count +1;
-			
-		end
+		acc = acc + ratings(i
 		
-	end
-	
-	VarUser(i) = acc/count;
-	
-end
+	VarUser(i) 
 
-
-%VarUser = sum(tempRatings,2) ./numRatingUser - meanUser.^2;
+VarUser = sum(tempRatings,2) ./numRatingUser - meanUser.^2;
 
 
 
@@ -166,27 +157,23 @@ for countIter=1:numIteration
 	for countItem=1:numMovie
 		
 		for countLC=1:numLatentClass
-			
-			up = 0;
-			
-			if origRatings(countUser,countItem) ~= 0
+
+			up = 0; 
+
+			for countUser = 1 : numUser
+
+				if origRatings(countUser,countItem) ~= 0
 				
-				for countUser = 1 : numUser
-					
-					
-					
 					up = up + ratings(countUser,countItem)*Q(countUser,countItem,countLC);
-					
+				
 				end
-				
-				down = sum(Q(:,countItem,countLC));
-				
-				M_yz(countItem,countLC) = up/down;
-				
+
 			end
 			
-			
-			
+			down = sum(Q(:,countItem,countLC));
+
+			M_yz(countItem,countLC) = up/down;
+
 		end
 		
 	end
@@ -209,38 +196,32 @@ for countIter=1:numIteration
 	for countItem=1:numMovie
 		
 		for countLC=1:numLatentClass
-			
-			tempup = 0;
-			
-			if origRatings(countUser,countItem) ~= 0
+
+			tempup = 0; 
+
+			for countUser = 1 : numUser
+
+				if origRatings(countUser,countItem) ~= 0
 				
-				for countUser = 1 : numUser
-					
-					
-					
 					tempup = tempup + (ratings(countUser,countItem)-M_yz(countItem,countLC))^2*Q(countUser,countItem,countLC);
 					
 				end
+			end
+			
+			down = sum(Q(:,countItem,countLC));
+			
+			if(tempup/down > 0.1) 
 				
+				Std_yz(countItem,countLC) = sqrt(tempup/down);
+			
+			else
 				
-				down = sum(Q(:,countItem,countLC));
-				
-				if(tempup/down > 0.1)
-					
-					Std_yz(countItem,countLC) = sqrt(tempup/down);
-					
-				else
-					
-					Std_yz(countItem,countLC) = 0.1;
-					
-				end
+				Std_yz(countItem,countLC) = 0.1;
 				
 			end
 			
-			
-			
-			
-			
+				
+						
 		end
 		
 	end
