@@ -147,23 +147,40 @@ for countFile = 1:5
 				
 				if origRatings(countUser,countItem) ~= 0
 					
-					up = Pzu(countUser,:) .* gaussianPDF(ratings(countUser,countItem)*ones(1,numLatentClass),M_yz(countItem,:),Std_yz(countItem,:));
-					
-					up = up.^beta;
-					
-					down = sum(up);
-					
-					if ismember(1,isnan(up/down))
+					for countLC=1:numLatentClass
 						
-						disp 'Q2 Nan occured'
+						up = Pzu(countUser,countLC) .* gaussianPDF2(ratings(countUser,countItem),M_yz(countItem,countLC),Std_yz(countItem,countLC));
+						
+						up = up.^beta;
+						
+						down = down + up;
+						
+						if up == 0 
+							
+							disp 'Q up is 0';
+							pause;
+							
+						end
+						
+						Q(countUser,countItem, countLC) = up;
+						
+						
+						
+					end
+					
+					if down ~=0
+						
+						Q(countUser,countItem,:) = Q(countUser,countItem,:)/down;
+						
+						
+						
+					else
+						
+						disp 'Q2 down = 0 occured'
 						pause;
 						
 					end
 					
-					if down ~=0 
-					
-						Q(countUser,countItem,:) = up/down;
-					end
 					
 					
 					
@@ -197,14 +214,14 @@ for countFile = 1:5
 		PreviousM = M_yz;
 		
 		for countItem=1:numMovie
-			
-			if countItem == 711
-				
-				disp 'M countItem is 711'
-				
-				pause;
-				
-			end
+% 			
+% 			if countItem == 711
+% 				
+% 				disp 'M countItem is 711'
+% 				
+% 				pause;
+% 				
+% 			end
 			
 			
 			for countLC=1:numLatentClass
@@ -220,7 +237,12 @@ for countFile = 1:5
 						
 						up = up + ratings(countUser,countItem)*Q(countUser,countItem,countLC);
 						
+						%disp(Q(countUser,countItem,countLC))
+						
+						
 						down = down + Q(countUser,countItem,countLC);
+						
+						
 						
 					end
 					
@@ -281,11 +303,11 @@ for countFile = 1:5
 					
 				end
 				
-				Std_yz(countItem,countLC) = sqrt(tempup/down);
+				%Std_yz(countItem,countLC) = sqrt(tempup/down);
 				
-				if(tempup/down > 0.00001)
+				if(tempup/down > 0.1)
 					
-%					Std_yz(countItem,countLC) = sqrt(tempup/down);
+					Std_yz(countItem,countLC) = sqrt(tempup/down);
 					
 				elseif (down == 0)
 					
@@ -296,13 +318,13 @@ for countFile = 1:5
 					
 				else
 					
-%					Std_yz(countItem,countLC) = 0.1;
+					Std_yz(countItem,countLC) = 0.5;
 
 
 					stdCount = stdCount + 1;
 					
 					disp(['Std saturation has occured!',num2str(stdCount)]);
-					pause;
+					%pause;
 					
 				end
 				
