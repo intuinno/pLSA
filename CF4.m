@@ -11,7 +11,7 @@ q = 1;
 
 numIteration = 100;
 
-numLatentClass = 3; 
+numLatentClass = 2; 
 
 beta = 1
 
@@ -347,7 +347,7 @@ for countIter=1:numIteration
 	
 	for i =1:numUser
 		
-		NorExpRating(i,:) = ExpectedRating(i,:)*(stdUser(i)-1) + meanUser(i);
+		NorExpRating(i,:) = ExpectedRating(i,:)*stdUser(i) + meanUser(i);
 		
 	end
 	
