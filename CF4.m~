@@ -9,11 +9,11 @@ clear
 
 q = 1;
 
-numIteration = 100;
+numIteration = 200;
 
-numLatentClass = 2; 
+numLatentClass = 3; 
 
-beta = 1
+beta = 0.99
 
 
 load smallRatings
@@ -44,7 +44,7 @@ for i =1:numUser
 		
 		if ratings(i,j) ~= 0 
 			
-			acc = acc + (ratings(i,j)-meanUser(i))^2
+			acc = acc + (ratings(i,j)-meanUser(i))^2;
 			count = count +1;
 			
 		end
@@ -79,9 +79,9 @@ end
 
 Q = rand(numUser, numMovie, numLatentClass);
 
-D = sum(sum(sum(Q)));
+%D = sum(sum(sum(Q)));
 
-Q = Q/D;
+%Q = Q/D;
 
 A = rand(numUser, numLatentClass);
 
@@ -212,6 +212,7 @@ for countIter=1:numIteration
 		for countLC=1:numLatentClass
 			
 			tempup = 0;
+			down = 0;
 			
 			for countUser = 1 : numUser
 				
@@ -219,12 +220,12 @@ for countIter=1:numIteration
 					
 					tempup = tempup + (ratings(countUser,countItem)-M_yz(countItem,countLC))^2*Q(countUser,countItem,countLC);
 					
+					down = down +  Q(countUser,countItem,countLC);
 				end
 				
 			end
 			
 			
-			down = sum(Q(:,countItem,countLC));
 			
 			if(tempup/down > 0.1)
 				
@@ -235,12 +236,6 @@ for countIter=1:numIteration
 				Std_yz(countItem,countLC) = 0.1;
 				
 			end
-			
-			
-			
-			
-			
-			
 			
 		end
 		
@@ -338,7 +333,7 @@ for countIter=1:numIteration
 				numRating = numRating + 1;
 			
 				
-				squareLoss = squareLoss +  sqrt((ratings(countUser,countItem)-ExpectedRating(countUser,countItem))^2);
+				squareLoss = squareLoss +  (ratings(countUser,countItem)-ExpectedRating(countUser,countItem))^2;
 				
 			end
 			
@@ -352,8 +347,25 @@ for countIter=1:numIteration
 		
 	end
 	
+	realSquareLoss = 0;
 	
-	squareLoss = squareLoss/numRating
+	for countUser=1:numUser
+		
+		for countItem=1:numMovie
+			
+			if origRatings(countUser, countItem) ~= 0 
+				
+				realSquareLoss = realSquareLoss +  (origRatings(countUser,countItem)-NorExpRating(countUser,countItem))^2;
+				
+			end
+			
+		end
+		
+	end
+	
+	squareL
+	
+	realSquareLoss = realSquareLoss/numRating
 	
 	Risk(countIter)=squareLoss;
 	
@@ -361,7 +373,7 @@ for countIter=1:numIteration
 	
 	if countIter > 5 
 		
-	if  abs(Risk(countIter-1) - Risk(countIter)) < Risk(countIter-1)*0.000001 
+	if  abs(Risk(countIter-1) - Risk(countIter)) < Risk(countIter-1)*0.00000001 
 		
 		disp 'Converged'
 		
