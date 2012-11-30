@@ -86,12 +86,12 @@ for countFile = 1:5
 	
 	origRatings = ratings;
 	
-% 	for i = 1:numUser
-% 		
-% 		ratings(i,:) = (ratings(i,:)-meanUser(i)) / stdUser(i);
-% 		
-% 	end
-% 	
+	for i = 1:numUser
+		
+		ratings(i,:) = (ratings(i,:)-meanUser(i)) / stdUser(i);
+		
+	end
+	
 	
 	%initialize Variables
 	
@@ -101,9 +101,9 @@ for countFile = 1:5
 	
 	Q = rand(numUser, numMovie, numLatentClass);
 	
-	%D = sum(sum(sum(Q)));
+	D = sum(sum(sum(Q)));
 	
-	%Q = Q/D;
+	Q = Q/D;
 	
 	A = rand(numUser, numLatentClass);
 	
@@ -115,7 +115,7 @@ for countFile = 1:5
 	
 	Pzu = A ./ D;
 	
-	M_yz = rand(numMovie, numLatentClass)*5;
+	M_yz = rand(numMovie, numLatentClass)-0.5;
 	
 	Std_yz = 3*rand(numMovie, numLatentClass)+1;
 	
@@ -167,7 +167,9 @@ for countFile = 1:5
 			
 		end
 		
-		
+			%D = sum(sum(sum(Q)));
+	
+	%Q = Q/D;
 		
 		if ismember(1,isnan(Q))
 			
@@ -209,6 +211,12 @@ for countFile = 1:5
 				
 				if (down ~=0)
 					M_yz(countItem,countLC) = up/down;
+					
+				else
+					M_yz(countItem,countLC) = 0;
+					disp 'M down is 0'
+					%pause;
+					
 				end
 				
 				
@@ -255,9 +263,16 @@ for countFile = 1:5
 					
 					Std_yz(countItem,countLC) = sqrt(tempup/down);
 					
+				elseif (down == 0)
+					
+					
+					Std_yz(countItem,countLC) = 1;
+					
 				else
 					
 					Std_yz(countItem,countLC) = 0.1;
+					disp 'Std saturation has occured!'
+					pause;
 					
 				end
 				

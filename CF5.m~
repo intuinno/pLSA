@@ -17,20 +17,24 @@ beta = 0.99
 
 ratings = zeros(943, 1682);
 
+nowSet = now;
+
+[numUser numMovie] = size(ratings);
+
+
 for countFile = 1:5
 	
 	filename = ['u',num2str(countFile),'.base'];
 	
 	M = dlmread(filename);
 	
-	[size, t] = size(M);
+	[numBase, t] = size(M);
+	
+	figure;
 	
 	
 	
-	[numUser numMovie] = size(ratings);
-	
-	
-	for i = 1:size 
+	for i = 1:numBase 
 		
 		ratings(M(i,1),M(i,2)) = M(i,3);
 		
@@ -203,7 +207,9 @@ for countFile = 1:5
 					
 				end
 				
-				M_yz(countItem,countLC) = up/down;
+				if (down ~=0)
+					M_yz(countItem,countLC) = up/down;
+				end
 				
 				
 			end
@@ -387,7 +393,7 @@ for countFile = 1:5
 		
 		Risk(countIter)=squareLoss;
 		
-		figure, plot(Risk),title(filename);
+		plot(Risk),title(filename);
 		
 		if countIter > 5
 			
@@ -427,7 +433,7 @@ for countFile = 1:5
 	testError = testError/size
 	
 	
-	fileName = ['Report',num2str(countFile),' at ', datestr(now)];
+	fileName = ['Report',num2str(countFile),' at ', datestr(nowSet)];
 	
 	save(fileName);
 	
