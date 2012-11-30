@@ -101,9 +101,12 @@ for countFile = 1:5
 	
 	Q = rand(numUser, numMovie, numLatentClass);
 	
-	D = sum(sum(sum(Q)));
-	
-	Q = Q/D;
+	for i=1:numUser
+		for j=1:numMovie
+			D = sum(Q(i,j,:));
+			Q(i,j,:) = Q(i,j,:)/D;
+		end
+	end
 	
 	A = rand(numUser, numLatentClass);
 	
@@ -115,7 +118,7 @@ for countFile = 1:5
 	
 	Pzu = A ./ D;
 	
-	M_yz = rand(numMovie, numLatentClass)-0.5;
+	M_yz = rand(numMovie, numLatentClass)-1;
 	
 	Std_yz = 3*rand(numMovie, numLatentClass)+1;
 	
@@ -242,10 +245,12 @@ for countFile = 1:5
 		stdCount = 0;
 		for countItem=1:numMovie
 			
+			
+			
 			for countLC=1:numLatentClass
 				
 				tempup = 0;
-				down = 0;
+				
 				
 				for countUser = 1 : numUser
 					
@@ -260,7 +265,7 @@ for countFile = 1:5
 				
 				
 				
-				if(tempup/down > 0.1)
+				if(tempup/down > 0.01)
 					
 					Std_yz(countItem,countLC) = sqrt(tempup/down);
 					
@@ -268,13 +273,14 @@ for countFile = 1:5
 					
 					
 					Std_yz(countItem,countLC) = 1;
+				
 					
 				else
 					
 					Std_yz(countItem,countLC) = 0.1;
 					stdCount = stdCount + 1;
 					
-					disp(['Std saturation has occured!',num2str(stdCount)]);
+					%disp(['Std saturation has occured!',num2str(stdCount)]);
 					%pause;
 					
 				end
@@ -308,8 +314,15 @@ for countFile = 1:5
 				
 				for countItem = 1 : numMovie
 					
-					up = up + Q(countUser,countItem,countLC);
-					down = down + Q(countUser,countItem,countLC);
+					if origRatings(countUser,countItem) ~= 0
+					
+
+						up = up + Q(countUser,countItem,countLC);
+					
+						down = down + Q(countUser,countItem,countLC);
+						
+					end
+					
 					
 				end
 				
@@ -318,7 +331,13 @@ for countFile = 1:5
 				
 			end
 			
-			
+			if down == 0
+				
+				disp 'Pzu down is 0!'
+				
+				pause;
+				
+			end;
 			
 			Pzu(countUser,:) = Pzu(countUser,:) / down;
 			
@@ -409,7 +428,7 @@ for countFile = 1:5
 		
 		realSquareLoss = realSquareLoss/numRating
 		
-		Risk(countIter)=squareLoss;
+		Risk(countIter)=realSquareLoss;
 		
 		plot(Risk),title(filename);
 		
@@ -452,7 +471,7 @@ for countFile = 1:5
 	
 	testError = testError/size
 	
-	saveas(sprintf('Risk trend %s.tif',countFile))
+	saveas(countFile,sprintf('Risk trend %s.tif',filename));
 	
 	
 	fileName = ['Report',num2str(countFile),' at ', num2str(nowSet)];

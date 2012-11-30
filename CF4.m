@@ -11,12 +11,12 @@ q = 1;
 
 numIteration = 200;
 
-numLatentClass = 3; 
+numLatentClass = 5; 
 
 beta = 0.99
 
 
-load smallRatings
+load 1Kratings
 
 [numUser numMovie] = size(ratings);
 
@@ -64,11 +64,11 @@ stdUser = sqrt(VarUser);
 
 origRatings = ratings;
 
-for i = 1:numUser
- 	
- 	ratings(i,:) = (ratings(i,:)-meanUser(i)) / stdUser(i);
- 	
-end
+% for i = 1:numUser
+%  	
+%  	ratings(i,:) = (ratings(i,:)-meanUser(i)) / stdUser(i);
+%  	
+% end
 
 
 %initialize Variables
