@@ -239,6 +239,7 @@ for countFile = 1:5
 		
 		PreviousStd = Std_yz;
 		
+		stdCount = 0;
 		for countItem=1:numMovie
 			
 			for countLC=1:numLatentClass
@@ -270,8 +271,10 @@ for countFile = 1:5
 					
 				else
 					
-					Std_yz(countItem,countLC) = 1;
-					disp 'Std saturation has occured!'
+					Std_yz(countItem,countLC) = 3;
+					stdCount = stdCount + 1;
+					
+					disp(['Std saturation has occured!',num2str(stdCount)]);
 					%pause;
 					
 				end
