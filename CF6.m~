@@ -11,7 +11,7 @@ q = 1;
 
 numIteration = 200;
 
-numLatentClass = 3; 
+numLatentClass = 5; 
 
 beta = 1
 
@@ -28,13 +28,13 @@ for countFile = 1:5
 	
 	M = dlmread(filename);
 	
-	[numBase, t] = size(M);
+	[numRow, numCol] = size(M);
 	
-	figure;
+	figure(filename);
 	
 	
 	
-	for i = 1:numBase 
+	for i = 1:numRow 
 		
 		ratings(M(i,1),M(i,2)) = M(i,3);
 		
@@ -271,7 +271,7 @@ for countFile = 1:5
 					
 				else
 					
-					Std_yz(countItem,countLC) = 1;
+					Std_yz(countItem,countLC) = 0.1;
 					stdCount = stdCount + 1;
 					
 					disp(['Std saturation has occured!',num2str(stdCount)]);
@@ -451,6 +451,8 @@ for countFile = 1:5
 	end
 	
 	testError = testError/size
+	
+	saveas(sprintf('img%d.tif',num_picture))
 	
 	
 	fileName = ['Report',num2str(countFile),' at ', num2str(nowSet)];
