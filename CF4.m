@@ -169,22 +169,23 @@ for countIter=1:numIteration
 			
 			up = 0;
 			
-			if origRatings(countUser,countItem) ~= 0
+			down = 0;
+						
+			for countUser = 1 : numUser
 				
-				for countUser = 1 : numUser
-					
-					
+				
+				if origRatings(countUser,countItem) ~= 0
 					
 					up = up + ratings(countUser,countItem)*Q(countUser,countItem,countLC);
 					
+					down = down + Q(countUser,countItem,countLC);
+					
 				end
 				
-				down = sum(Q(:,countItem,countLC));
-				
-				M_yz(countItem,countLC) = up/down;
 				
 			end
 			
+			M_yz(countItem,countLC) = up/down;
 			
 			
 		end
@@ -211,35 +212,30 @@ for countIter=1:numIteration
 		for countLC=1:numLatentClass
 			
 			tempup = 0;
+			down = 0;
 			
-			if origRatings(countUser,countItem) ~= 0
+			for countUser = 1 : numUser
 				
-				for countUser = 1 : numUser
-					
-					
+				if origRatings(countUser,countItem) ~= 0
 					
 					tempup = tempup + (ratings(countUser,countItem)-M_yz(countItem,countLC))^2*Q(countUser,countItem,countLC);
 					
-				end
-				
-				
-				down = sum(Q(:,countItem,countLC));
-				
-				if(tempup/down > 0.1)
-					
-					Std_yz(countItem,countLC) = sqrt(tempup/down);
-					
-				else
-					
-					Std_yz(countItem,countLC) = 0.1;
-					
+					down = down +  Q(countUser,countItem,countLC);
 				end
 				
 			end
 			
 			
 			
-			
+			if(tempup/down > 0.1)
+				
+				Std_yz(countItem,countLC) = sqrt(tempup/down);
+				
+			else
+				
+				Std_yz(countItem,countLC) = 0.1;
+				
+			end
 			
 		end
 		
