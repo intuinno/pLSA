@@ -214,7 +214,7 @@ for countFile = 1:5
 					
 				else
 					M_yz(countItem,countLC) = 0;
-					disp 'M down is 0'
+					%disp 'M down is 0'
 					%pause;
 					
 				end
@@ -270,9 +270,9 @@ for countFile = 1:5
 					
 				else
 					
-					Std_yz(countItem,countLC) = 0.1;
+					Std_yz(countItem,countLC) = 1;
 					disp 'Std saturation has occured!'
-					pause;
+					%pause;
 					
 				end
 				
