@@ -24,6 +24,9 @@ nowSet = now;
 
 for countFile = 1:5
 	
+	ratings = 0;
+	
+	
 	filename = ['u',num2str(countFile),'.base'];
 	
 	M = dlmread(filename);
@@ -434,7 +437,7 @@ for countFile = 1:5
 				if origRatings(countUser, countItem) ~= 0
 					
 					
-					numRating = numRating + 1;
+					numRating = numRating + 1
 					
 					
 					squareLoss = squareLoss +  (ratings(countUser,countItem)-ExpectedRating(countUser,countItem))^2;
@@ -512,7 +515,7 @@ for countFile = 1:5
 		
 	end
 	
-	testError = testError/size
+	testError = testError/numRow
 	
 	saveas(countFile,sprintf('Risk trend %s.tif',filename));
 	
