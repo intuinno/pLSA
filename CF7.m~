@@ -9,7 +9,7 @@ clear
 
 q = 1;
 
-numIteration = 200;
+numIteration = 500;
 
 numLatentClass = 5; 
 
@@ -21,8 +21,13 @@ nowSet = now;
 
 [numUser numMovie] = size(ratings);
 
+for numLatentClass = [2 5 10 20 40 60 80 100] 
+
 
 for countFile = 1:5
+	
+	ratings = zeros(943, 1682);
+	
 	
 	filename = ['u',num2str(countFile),'.base'];
 	
@@ -498,8 +503,6 @@ for countFile = 1:5
 		
 	end
 	
-	pause;
-	
 	filename = ['u',num2str(countFile),'.test'];
 	
 	M = dlmread(filename);
@@ -516,7 +519,7 @@ for countFile = 1:5
 	
 	testError = testError/numRow
 	
-	saveas(countFile,sprintf('Risk trend %s.tif',filename));
+	saveas(countFile,sprintf('Risk trend %s with k=%.tif',filename));
 	
 	
 	fileName = ['Report',num2str(countFile),' at ', num2str(nowSet)];
@@ -527,4 +530,5 @@ for countFile = 1:5
 	
 end
 
+end
 

@@ -21,6 +21,8 @@ nowSet = now;
 
 [numUser numMovie] = size(ratings);
 
+for numLatentClass = [2 5 10 20 40 60 80 100] 
+
 
 for countFile = 1:5
 	
@@ -517,10 +519,10 @@ for countFile = 1:5
 	
 	testError = testError/numRow
 	
-	saveas(countFile,sprintf('Risk trend %s.tif',filename));
+	saveas(countFile,sprintf('Risk trend %s with k=%i.tif',filename,numLatentClass));
 	
 	
-	fileName = ['Report',num2str(countFile),' at ', num2str(nowSet)];
+	fileName = ['Report',num2str(countFile),'with k=',num2str(numLatentClass),' at ', num2str(nowSet)];
 	
 	save(fileName);
 	
@@ -528,4 +530,5 @@ for countFile = 1:5
 	
 end
 
+end
 
