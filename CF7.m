@@ -24,26 +24,26 @@ nowSet = now;
 
 for countFile = 1:5
 	
-% 	filename = ['u',num2str(countFile),'.base'];
-% 	
-% 	M = dlmread(filename);
-% 	
-% 	[numRow, numCol] = size(M);
-% 	
-% 	figure(countFile);
-% 	
-% 	
-% 	
-% 	for i = 1:numRow 
-% 		
-% 		ratings(M(i,1),M(i,2)) = M(i,3);
-% 		
-% 	end
-% 	
-
-	load 1Kratings
+	filename = ['u',num2str(countFile),'.base'];
 	
-	filename = '1Kratings'
+	M = dlmread(filename);
+	
+	[numRow, numCol] = size(M);
+	
+	figure(countFile);
+	
+	
+	
+	for i = 1:numRow 
+		
+		ratings(M(i,1),M(i,2)) = M(i,3);
+		
+	end
+	
+
+	%load 1Kratings
+	
+	%filename = '1Kratings'
 		
 		
 	meanUser = mean(ratings,2);
@@ -255,8 +255,8 @@ for countFile = 1:5
 					
 				else
 					M_yz(countItem,countLC) = 0;
-					disp 'M down is 0'
-					pause;
+					%disp 'M down is 0'
+					%pause;
 					
 				end
 				
@@ -312,9 +312,9 @@ for countFile = 1:5
 				elseif (down == 0)
 					
 					
-%					Std_yz(countItem,countLC) = 1;
-					disp 'Std down is 0!'
-					pause;
+					Std_yz(countItem,countLC) = 1;
+%					disp 'Std down is 0!'
+%					pause;
 					
 				else
 					
@@ -323,7 +323,7 @@ for countFile = 1:5
 
 					stdCount = stdCount + 1;
 					
-					disp(['Std saturation has occured!',num2str(stdCount)]);
+					%disp(['Std saturation has occured!',num2str(stdCount)]);
 					%pause;
 					
 				end
@@ -479,7 +479,7 @@ for countFile = 1:5
 		
 		if countIter > 5
 			
-			if  abs(Risk(countIter-1) - Risk(countIter)) < Risk(countIter-1)*0.00000001
+			if  abs(Risk(countIter-1) - Risk(countIter)) < Risk(countIter-1)*0.0001
 				
 				disp 'Converged'
 				
@@ -502,11 +502,11 @@ for countFile = 1:5
 	
 	M = dlmread(filename);
 	
-	[size, t] = size(M);
+	[numRow, numCol] = size(M);
 	
 	testError = 0;
 	
-	for i=1:size 
+	for i=1:numRow 
 		
 		testError = testError + abs(NorExpRating(M(i,1),M(i,2))-M(i,3));
 		
