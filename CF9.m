@@ -22,10 +22,10 @@ nowSet = now;
 [numUser numMovie] = size(ratings);
 
 testMetric=[];
-
+numIterLC = 0;
 
 for numLatentClass = [2 5 10 20 40 60 80 100] 
-
+numIterLC = numIterLC + 1;
 
 for countFile = 1:5
 	
@@ -488,7 +488,7 @@ for countFile = 1:5
 		
 		titleStr = [filename,'  Number of Latent Class k = ', num2str(numLatentClass)];
 		
-		plot(Risk),title(filename);
+		plot(Risk),title(titleStr);
 		
 		drawnow;
 		
@@ -513,12 +513,12 @@ for countFile = 1:5
 		
 	end
 	
+	trainResult = [realSquareLoss, realMAE, toc];
+	
 	disp 'Train Summary============='
 		sprintf('Num Latent Class = %d',numLatentClass)
 	sprintf('Data set is %d', countFile)
-	testMetric(numLatentClass,countFile,1, 1) = realSquareLoss
-	testMetric(numLatentClass,countFile,1, 2) = realMAE
-	testMetric(numLatentClass,countFile,1, 3) = toc
+	testMetric(numIterLC,countFile,1, :) = trainResult
 	
 	tic
 	disp ' ========================='
@@ -554,9 +554,8 @@ for countFile = 1:5
 	
 	disp 'Test Summary============='
 
-	testMetric(numLatentClass,countFile,2, 1) = testRMS
-	testMetric(numLatentClass,countFile,2, 2) = testMAE
-	testMetric(numLatentClass,countFile,2, 3) = toc
+	testResult = [testRMS, testMAE, toc];
+	testMetric(numIterLC,countFile,2, :) = testResult
 	disp ' ========================='
 	toc
 	
